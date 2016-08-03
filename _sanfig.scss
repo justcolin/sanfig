@@ -6,7 +6,7 @@
 // (located in root directory of this project) for details.
 
 // Dynamically create CSS rules from a map.
-@mixin sanfig_rules($rules) {
+@mixin sanfig_map_to_css($rules) {
   @each $attribute, $value in $rules {
     #{$attribute}: $value;
   }
@@ -29,8 +29,8 @@
 
 // Lookup a value in a configuration map, returning a default value when a real
 // value isn't found, or null if nothing is found.
-@function sanfig_get_config($conf_map, $keys...) {
-  $possibles: _sanfig_lookup_chain($conf_map, $keys...);
+@function sanfig_get_config($config_map, $keys...) {
+  $possibles: _sanfig_lookup_chain($config_map, $keys...);
   $output:    null;
 
   @each $possible in $possibles {
