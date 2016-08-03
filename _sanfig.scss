@@ -5,6 +5,12 @@
 // terms of the three-clause BSD license. See LICENSE.txt
 // (located in root directory of this project) for details.
 
+@mixin sanfig_rules($rules) {
+  @each $attribute, $value in $rules {
+    #{$attribute}: $value;
+  }
+}
+
 @function sanfig_deep_map_get($map, $keys...) {
   $output: $map;
 
