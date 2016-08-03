@@ -19,6 +19,24 @@
   @return $output;
 }
 
+
+@function sanfig_get_config($conf_map, $keys...) {
+  $possibles: _sanfig_lookup_chain($conf_map, $keys...);
+  $output:    null;
+
+  @each $possible in $possibles {
+    @if $output == null {
+      @if type_of($possible) == map {
+        $output: map_get($possible, DEFAULT);
+      } @else if type_of($possible) != null {
+        $output: $possible;
+      }
+    }
+  }
+
+  @return $output;
+}
+
 // Internal Functions
 //   - only for use by library functions
 //   - not guaranteed to be stable thus not for use outside of the library
