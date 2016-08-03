@@ -43,7 +43,25 @@
     }
   }
 
-  @return $output;
+  @return _sanfig_dedelay($config_map, $output);
+}
+
+@function SAME_AS($keys...) {
+  @return (SANFIG_DELAYED, $keys);
+}
+
+@mixin sanfig_config_to_css($config_map, $variants: (), $type: null, $sub_type: null) {
+  $defaults: _sanfig_config_to_rules($config_map, $type);
+
+  @include sanfig_map_to_rules($defaults);
+
+  @each $variant, $selector in $variants {
+    $rules: _sanfig_config_to_rules($config_map, $type, $variant, $defaults);
+
+    @if length($rules) > 1 {
+      #{$selector} { @include sanfig_map_to_rules($rules); }
+    }
+  }
 }
 
 
@@ -85,4 +103,39 @@
   } @else {
     @return ();
   }
+}
+
+@function _sanfig_dedelay($config, $value) {
+  @if type_of($value) == list {
+    @if nth($value, 1) == SANFIG_DELAYED {
+      @return sanfig_get_config($config, nth($value, 2)...);
+    } @else {
+      $result: ();
+
+      @each $sub_value in $value {
+        $result: append($result, _sanfig_dedelay($config, $sub_value));
+      }
+
+      @return $result;
+    }
+  } @else {
+    @return $value;
+  }
+}
+
+@function _sanfig_config_to_rules($config_map, $type, $variant: false, $defaults: ()) {
+  $attributes: map_keys(if($type, map_get($config_map, $type), $config_map));
+  $rules:      ();
+
+  @each $attribute in $attributes {
+    $path:  if($type, ($type $attribute), $attribute);
+    $path:  if($variant, append($path, $variant), $path);
+    $value: sanfig_get_config($config_map, $path...);
+
+    @if $value != map_get($defaults, $attribute) {
+      $rules: map_merge($rules, ( $attribute: $value ));
+    }
+  }
+
+  @return $rules;
 }
