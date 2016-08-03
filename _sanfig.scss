@@ -5,12 +5,14 @@
 // terms of the three-clause BSD license. See LICENSE.txt
 // (located in root directory of this project) for details.
 
+// Dynamically create CSS rules from a map.
 @mixin sanfig_rules($rules) {
   @each $attribute, $value in $rules {
     #{$attribute}: $value;
   }
 }
 
+// Perform a deep lookup on a map, returning null if nothing is found.
 @function sanfig_deep_map_get($map, $keys...) {
   $output: $map;
 
@@ -25,7 +27,8 @@
   @return $output;
 }
 
-
+// Lookup a value in a configuration map, returning a default value when a real
+// value isn't found, or null if nothing is found.
 @function sanfig_get_config($conf_map, $keys...) {
   $possibles: _sanfig_lookup_chain($conf_map, $keys...);
   $output:    null;
@@ -43,10 +46,14 @@
   @return $output;
 }
 
+
+
 // Internal Functions
 //   - only for use by library functions
 //   - not guaranteed to be stable thus not for use outside of the library
 
+// Returns a list containing the result of performing a deep map lookup with the
+// keys, the keys sans the last key, the keys sans the last two keys, etc.
 @function _sanfig_lookup_chain($map, $keys...) {
   $paths: append((), $keys);
 
@@ -65,6 +72,7 @@
   @return append($chain, $map);
 }
 
+// Returns a copy of the given list with the last item removed.
 @function _sanfig_pop($list) {
   @if length($list) > 1 {
     $output: ();
