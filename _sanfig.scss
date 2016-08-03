@@ -24,16 +24,33 @@
 //   - not guaranteed to be stable thus not for use outside of the library
 
 @function _sanfig_lookup_chain($map, $keys...) {
-  $chain: append((), $map);
+  $paths: append((), $keys);
 
-  $layer: ();
-  @each $key in $keys {
-    $layer: append($layer, $key);
+  @while length(nth($paths, -1)) > 1 {
+    $paths: append($paths, _sanfig_pop(nth($paths, -1)));
+  }
+
+  $chain: ();
+  @each $path in $paths {
     $chain: append(
               $chain,
-              sanfig_deep_map_get($map, $layer...)
+              sanfig_deep_map_get($map, $path...)
             );
   }
 
-  @return $chain;
+  @return append($chain, $map);
+}
+
+@function _sanfig_pop($list) {
+  @if length($list) > 1 {
+    $output: ();
+
+    @for $index from 1 through length($list) - 1 {
+      $output: append($output, nth($list, $index))
+    }
+
+    @return $output
+  } @else {
+    @return ();
+  }
 }
