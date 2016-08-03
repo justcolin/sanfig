@@ -18,3 +18,22 @@
 
   @return $output;
 }
+
+// Internal Functions
+//   - only for use by library functions
+//   - not guaranteed to be stable thus not for use outside of the library
+
+@function _sanfig_lookup_chain($map, $keys...) {
+  $chain: append((), $map);
+
+  $layer: ();
+  @each $key in $keys {
+    $layer: append($layer, $key);
+    $chain: append(
+              $chain,
+              sanfig_deep_map_get($map, $layer...)
+            );
+  }
+
+  @return $chain;
+}
