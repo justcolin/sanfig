@@ -1,0 +1,109 @@
+// Copyright (C) 2016 Colin Fulton
+// All rights reserved.
+//
+// This software may be modified and distributed under the
+// terms of the three-clause BSD license. See LICENSE.txt
+// (located in root directory of this project) for details.
+
+@import 'sanfig';
+
+/* sanfig_map_to_css() */
+
+Expect {
+  @include sanfig_map_to_css((
+    value: a_value,
+    list:  (a list of values),
+  ));
+}
+
+To Equal {
+  value: a_value;
+  list:  a list of values;
+}
+
+/* sanfig_deep_map_get() */
+
+$nested_map: ( i: value_i, ii: value_ii );
+$example:    ( 1: ( a: $nested_map, b: value_b) );
+
+Expect True {
+  value:           sanfig_deep_map_get($example, 1, a)         == $nested_map;
+  nested_value:    sanfig_deep_map_get($example, 1, a, ii)     == value_ii;
+  fail_gives_null: sanfig_deep_map_get($example, 1, not_a_key) == null;
+}
+
+/* sanfig_get_config() basics */
+
+$example: (
+  1: (
+       a: value_a,
+       b: value_b,
+       c: (i: value_i, ii: value_ii),
+     ),
+);
+
+Expect True {
+  nested_value:     sanfig_get_config($example, 1, b)     == value_b;
+  nested_value_2:   sanfig_get_config($example, 1, c, ii) == value_ii;
+  unset_key:        sanfig_get_config($example, 2)        == null;
+  nested_unset_key: sanfig_get_config($example, 1, d)     == null;
+}
+
+/* sanfig_get_config() DEFAULT */
+
+$example: (
+  DEFAULT: default_value,
+  1: (
+       a: (
+         i:   false,
+         ii:  false,
+         iii: ( DEFAULT: default_value_2 ),
+       ),
+     ),
+);
+
+Expect True {
+  unset_gets_default:  sanfig_get_config($example, 2)         == default_value;
+  maps_get_default:    sanfig_get_config($example, 1)         == default_value;
+  unset_walks_up_tree: sanfig_get_config($example, 1, b)      == default_value;
+  maps_walk_up_tree:   sanfig_get_config($example, 1, a)      == default_value;
+  use_nearset_default: sanfig_get_config($example, 1, a, iii) == default_value_2;
+}
+
+/* sanfig_get_config() SAME_AS */
+
+$example: (
+  1: (
+       a: value_1_a,
+       b: SAME_AS(1, a),
+       c: SAME_AS(2, a),
+       d: 1 2 SAME_AS(2, a),
+     ),
+  2: ( a: value_2_a ),
+);
+
+Expect True {
+  already_defined_values: sanfig_get_config($example, 1, b) == value_1_a;
+  set_in_the_future:      sanfig_get_config($example, 1, c) == value_2_a;
+  part_of_a_list:         sanfig_get_config($example, 1, d) == (1 2 value_2_a);
+}
+
+/* _sanfig_config_to_rules() */
+
+$example: (
+  1: (
+       color: blue,
+       border: solid 1px,
+       alternative: (
+         color: green
+       ),
+     ),
+);
+
+$thing: "&:stuff";
+
+stuff {
+  #{$thing} {
+    a: x;
+  }
+}
